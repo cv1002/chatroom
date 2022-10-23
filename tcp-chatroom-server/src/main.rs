@@ -98,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let mut lines = BufReader::new(reader).lines();
 
                 while let Ok(Some(line)) = lines.next_line().await {
-                    if let Ok(_) = serde_json::from_str::<Message>(line.as_str()) {
+                    if serde_json::from_str::<Message>(line.as_str()).is_ok() {
                         println!("{}", line);
                         mq.lock().await.push_back(Arc::new(line));
                     }
