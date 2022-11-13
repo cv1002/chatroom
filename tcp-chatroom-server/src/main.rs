@@ -24,9 +24,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         async move {
             loop {
                 let mut mq = mq.lock().await;
-                let message = match mq.pop_front() {
-                    Some(msg) => msg,
-                    None => continue,
+                let Some(message) =  mq.pop_front() else {
+                    continue
                 };
                 let _ = sx.send(message);
             }
@@ -49,9 +48,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let mut buffer: Vec<u8> = Vec::new();
             loop {
-                let one_byte = match reader.read_u8().await {
-                    Ok(byte) => byte,
-                    Err(_) => break None,
+                let Ok(one_byte) = reader.read_u8().await else {
+                    break None
                 };
 
                 match one_byte {
@@ -80,9 +78,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         .await;
-        let headers = match headers {
-            Some(headers) => headers,
-            None => continue,
+        let Some(headers) = headers else {
+            continue
         };
 
         // Use the GoToGroup token to pass.
@@ -110,9 +107,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut receiver = rx.resubscribe();
             async move {
                 loop {
-                    let msg = match receiver.recv().await {
-                        Ok(msg) => msg,
-                        Err(_) => continue,
+                    let Ok(msg) = receiver.recv().await else {
+                        continue
                     };
                     let _ = sender.write(msg.as_bytes()).await;
                     let _ = sender.write("\n".as_bytes()).await;
