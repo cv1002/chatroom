@@ -35,9 +35,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //  Waiting for connecting
     loop {
         let (mut reader, mut sender) = {
-            let socket = match listener.accept().await {
-                Ok((socket, _)) => socket,
-                Err(_) => continue,
+            let Ok((socket, _)) = listener.accept().await else {
+                continue
             };
             socket.into_split()
         };
